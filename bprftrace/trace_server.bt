@@ -1,0 +1,19 @@
+// trace_server.bt — 追蹤 REST API handler 函數
+
+uprobe:../myserver:"bprf_demo/service.HandleHello"
+{
+    $ptr = reg("ax");
+    $len = reg("bx");
+    printf("👉 [HandleHello] name=\"%s\" (len=%d)\n", str($ptr, $len), $len);
+}
+
+uretprobe:../myserver:"bprf_demo/service.HandleHello"
+{
+    printf("🎯 [HandleHello] 回傳了！ (string return)\n");
+}
+
+
+BEGIN
+{
+    printf("🚀 開始追蹤 REST API handler... 按 Ctrl+C 結束。\n");
+}

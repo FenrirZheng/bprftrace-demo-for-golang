@@ -1,0 +1,30 @@
+// trace_ptr.bt
+// 追蹤 service.inputPtr(cc *CC) string — hello_word.go:29
+// CC struct { index int; name string }
+// 注意：Go DWARF type name 含有 "/" (bprf_demo/service.CC)，bpftrace 無法解析，
+//       所以必須手動定義 struct
+// 需要安裝 : sudo apt install linux-headers-amd64
+
+struct CC {
+    long index;
+    unsigned long name_data;
+    long name_len;
+};
+
+uprobe:../myserver:bprf_demo/service.inputPtr
+{
+    $u = (struct CC *)arg0;
+    printf("👉 [inputPtr] 被呼叫了！ cc=%p, cc.index=%d, cc.name=\"%s\" (len=%d)\n",
+        arg0, $u->index, str($u->name_data, $u->name_len), $u->name_len);
+}
+
+uretprobe:../myserver:bprf_demo/service.inputPtr
+{
+    // string 回傳: ax=data pointer, bx=length
+    printf("🎯 [inputPtr] 回傳了！ return_str=\"%s\"\n", str(retval, reg("bx")));
+}
+
+BEGIN
+{
+    printf("🚀 開始追蹤 service.inputPtr... 按 Ctrl+C 結束。\n");
+}

@@ -1,0 +1,26 @@
+// trace_service.bt
+// 追蹤 service.inputStruct(cc CC) string — hello_word.go:22
+// CC struct { index int; name string }
+// Go x86_64 register ABI 傳遞順序:
+//   ax = cc.index (int)
+//   bx = cc.name pointer
+//   cx = cc.name length
+
+uprobe:../myserver:"bprf_demo/service.inputStruct"
+{
+    $index = reg("ax");
+    $ptr = reg("bx");
+    $len = reg("cx");
+    printf("👉 [inputStruct] 被呼叫了！ cc.index=%d, cc.name=\"%s\" (len=%d)\n",
+        $index, str($ptr, $len), $len);
+}
+
+uretprobe:../myserver:"bprf_demo/service.inputStruct"
+{
+    printf("🎯 [inputStruct] 回傳了！\n");
+}
+
+BEGIN
+{
+    printf("🚀 開始追蹤 service.inputStruct... 按 Ctrl+C 結束。\n");
+}

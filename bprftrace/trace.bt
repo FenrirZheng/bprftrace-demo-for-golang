@@ -1,0 +1,26 @@
+// trace.bt
+
+// 追蹤第一個方法：Add
+uprobe:../myapp:"main.Calculate"
+{
+    printf("👉 [Calculate] 被呼叫了！ a=%d, b=%d\n", reg("ax"), reg("bx"));
+}
+
+// 追蹤第二個方法：Multiply
+uprobe:../myapp:"main.Multiply"
+{
+    printf("⚡ [Multiply] 被呼叫了！ x=%d, y=%d\n", reg("ax"), reg("bx"));
+}
+
+// 當 Multiply 執行結束並回傳時觸發
+uretprobe:../myapp:"main.Multiply"
+{
+    // 這裡的 retval 就是 Multiply 的結果，也就是你程式碼中的 c
+    printf("🎯 抓到 c 了！ c = %d\n", retval);
+}
+
+// 可選：加上程式啟動和結束的提示
+BEGIN
+{
+    printf("🚀 開始追蹤多個 Go 方法... 按 Ctrl+C 結束。\n");
+}

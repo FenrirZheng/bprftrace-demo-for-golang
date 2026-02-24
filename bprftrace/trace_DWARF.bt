@@ -1,0 +1,29 @@
+// trace_fixed.bt
+
+uprobe:../myserver:"bprf_demo/service.inputStruct"
+{
+    // Go 1.17+ Register ABI (Parameter Passing):
+    // arg0 (AX) = cc.index (int)
+    // arg1 (BX) = cc.name (pointer to string data)
+    // arg2 (CX) = cc.name (length of string)
+
+    // 注意：這裡不需要 cast 成 struct，因為結構已經被打散在暫存器裡了
+
+    // str(pointer, length) 是讀取 Go String 的最佳方式
+    printf("👉 [inputStruct] 被呼叫了！ index=%d, name=\"%s\"\n",
+           reg("ax"),
+           str(reg("bx"), reg("cx")));
+}
+
+uretprobe:../myserver:"bprf_demo/service.inputStruct"
+{
+    // 回傳值通常在 ax, bx ...
+    // string 回傳也是 ptr(ax), len(bx)
+    printf("🎯 [inputStruct] 回傳了！ return_str=\"%s\"\n", str(retval, reg("dx")));
+    // 註：回傳值的暫存器位置可能因 Go 版本略有不同，通常是 ax(data), bx(len) 或 ax(data), dx(len)
+}
+
+BEGIN
+{
+    printf("🚀 開始追蹤 service.inputStruct... 按 Ctrl+C 結束。\n");
+}
