@@ -1,0 +1,37 @@
+// trace_arr.bt
+// 追蹤 service.showArr(arr []string) — hello_word.go:65
+// Go slice 內部結構: {Data uintptr, Len int, Cap int}
+// Go 1.17+ Register ABI（傳值，打散到暫存器）:
+//   ax = Data (指向底層 string array 的指標)
+//   bx = Len
+//   cx = Cap
+// 每個 element 是 Go string = {Data uintptr, Len int} = 16 bytes
+//   arr[0] = Data + 0*16,  arr[1] = Data + 1*16, ...
+// 需要安裝 : sudo apt install linux-headers-amd64
+
+uprobe:../myserver:bprf_demo/service.showArr
+{
+    $data = reg("ax");
+    $len  = reg("bx");
+    $cap  = reg("cx");
+    printf("👉 [showArr] 被呼叫了！ len=%d, cap=%d\n", $len, $cap);
+
+    // 讀取 arr[0]
+    if ($len >= 1) {
+        $s0_ptr = *(uint64 *)($data);
+        $s0_len = *(int64 *)($data + 8);
+        printf("   arr[0] = \"%s\" (len=%d)\n", str($s0_ptr, $s0_len), $s0_len);
+    }
+
+    // 讀取 arr[1]
+    if ($len >= 2) {
+        $s1_ptr = *(uint64 *)($data + 16);
+        $s1_len = *(int64 *)($data + 24);
+        printf("   arr[1] = \"%s\" (len=%d)\n", str($s1_ptr, $s1_len), $s1_len);
+    }
+}
+
+BEGIN
+{
+    printf("🚀 開始追蹤 service.showArr... 按 Ctrl+C 結束。\n");
+}

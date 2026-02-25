@@ -52,3 +52,16 @@ func HelloPtr(w http.ResponseWriter, r *http.Request) {
 	result := inputPtr(&c)
 	fmt.Fprint(w, result)
 }
+
+func HelloPtrArr(w http.ResponseWriter, r *http.Request) {
+	name := r.URL.Query().Get("name")
+	arr := make([]string, 2)
+	arr[0] = "Hello, World!"
+	arr[1] = name
+	showArr(arr)
+}
+
+//go:noinline
+func showArr(arr []string) {
+	fmt.Println(arr)
+}

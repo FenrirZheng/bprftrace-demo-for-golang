@@ -1,0 +1,27 @@
+# trace_arr.dlv
+# Delve init script — 追蹤 /hello/arr API
+# 對 service.HelloPtrArr (handler) 和 service.showArr (核心邏輯) 設 tracepoint
+#
+# 用法:
+#   1. 編譯 (保留 debug info):
+#      go build -gcflags='all=-N -l' -o myserver server.go
+#
+#   2a. 直接啟動:
+#      dlv exec ./myserver --init delve/trace_arr.dlv
+#
+#   2b. 附加到已執行的程序:
+#      dlv attach <PID> --init delve/trace_arr.dlv --accept-multiclient
+
+# --- Tracepoint: HelloPtrArr (HTTP handler 入口) ---
+trace service.HelloPtrArr
+
+# on 1 中的 1 是 breakpoint/tracepoint 的編號。
+on 1 print r.URL.RawQuery
+
+
+# --- Tracepoint: showArr (核心函數，印出 slice 內容) ---
+trace s2 service.showArr
+on s2 print arr
+
+# 開始執行，tracepoint 命中時只印出不暫停
+continue

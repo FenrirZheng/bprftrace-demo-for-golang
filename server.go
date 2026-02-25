@@ -12,6 +12,7 @@ func main() {
 
 	http.HandleFunc("/hello/struct", service.HelloStruct)
 	http.HandleFunc("/hello/ptr", service.HelloPtr)
+	http.HandleFunc("/hello/arr", service.HelloPtrArr)
 	fmt.Println("Server starting on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

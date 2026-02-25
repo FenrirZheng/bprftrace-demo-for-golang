@@ -110,3 +110,18 @@ Date: Tue, 24 Feb 2026 03:35:21 GMT
 Hello, ptr_input!
 
 ```
+
+
+
+# Arr (slice)
+
+
+```shell
+bpftrace trace_arr.bt 
+```
+
+## test
+
+```shell
+http http://localhost:8080/hello/arr?name=Alice
+```
